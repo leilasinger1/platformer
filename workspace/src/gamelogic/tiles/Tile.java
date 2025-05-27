@@ -24,6 +24,10 @@ public class Tile{
 		this.solid = solid;
 		this.level = level;
 	}
+
+	public void setImage(BufferedImage img){
+		image = img;
+	}
 	
 	public void update (float tslf) {};
 	
