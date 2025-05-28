@@ -217,6 +217,7 @@ public class Level {
 							map.addTile(colIndex, rowIndex, g);
 							numSquaresToFill--;
 							placedThisRound.add(g);
+							
 						}
 					}
 					if(colIndex == c){
