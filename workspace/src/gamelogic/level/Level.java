@@ -35,6 +35,7 @@ public class Level {
 
 	private ArrayList<Enemy> enemiesList = new ArrayList<>();
 	private ArrayList<Flower> flowers = new ArrayList<>();
+	private ArrayList<Water> waters  = new ArrayList<>();
 
 	private List<PlayerDieListener> dieListeners = new ArrayList<>();
 	private List<PlayerWinListener> winListeners = new ArrayList<>();
@@ -62,6 +63,7 @@ public class Level {
 	public void restartLevel() {
 		int[][] values = mapdata.getValues();
 		Tile[][] tiles = new Tile[width][height];
+		waters = new ArrayList();
 
 		for (int x = 0; x < width; x++) {
 			int xPosition = x;
@@ -111,14 +113,22 @@ public class Level {
 					tiles[x][y] = new Gas(xPosition, yPosition, tileSize, tileset.getImage("GasTwo"), this, 2);
 				else if (values[x][y] == 17)
 					tiles[x][y] = new Gas(xPosition, yPosition, tileSize, tileset.getImage("GasThree"), this, 3);
-				else if (values[x][y] == 18)
+				else if (values[x][y] == 18) {
 					tiles[x][y] = new Water(xPosition, yPosition, tileSize, tileset.getImage("Falling_water"), this, 0);
-				else if (values[x][y] == 19)
+					waters.add((Water)tiles[x][y]);
+				}
+				else if (values[x][y] == 19){
 					tiles[x][y] = new Water(xPosition, yPosition, tileSize, tileset.getImage("Full_water"), this, 3);
-				else if (values[x][y] == 20)
+					waters.add((Water)tiles[x][y]);
+				}
+				else if (values[x][y] == 20){
 					tiles[x][y] = new Water(xPosition, yPosition, tileSize, tileset.getImage("Half_water"), this, 2);
-				else if (values[x][y] == 21)
+					waters.add((Water)tiles[x][y]);
+				}
+				else if (values[x][y] == 21){
 					tiles[x][y] = new Water(xPosition, yPosition, tileSize, tileset.getImage("Quarter_water"), this, 1);
+					waters.add((Water)tiles[x][y]);
+				}
 			}
 
 		}
@@ -176,7 +186,16 @@ public class Level {
 					i--;
 				}
 			}
-
+			boolean didITouchWater = false;
+			for (Water w: waters){
+				if (w.getHitbox().isIntersecting(player.getHitbox())){
+					//System.out.println("Touching water");
+					didITouchWater = true;
+				}
+			}
+			if (!didITouchWater){
+				//System.out.println("never touched water");
+			}
 			// Update the enemies
 			for (int i = 0; i < enemies.length; i++) {
 				enemies[i].update(tslf);
@@ -217,7 +236,7 @@ public class Level {
 							map.addTile(colIndex, rowIndex, g);
 							numSquaresToFill--;
 							placedThisRound.add(g);
-							
+
 						}
 					}
 					if(colIndex == c){
@@ -229,6 +248,9 @@ public class Level {
 		}
 
 	}
+
+
+
 
 	// #############################################################################################################
 	// Your code goes here!
@@ -255,6 +277,7 @@ public class Level {
 		// make water (You’ll need modify this to make different kinds of water such as
 		// half water and quarter water)
 		Water w = new Water(col, row, tileSize, tileset.getImage(size), this, fullness);
+		waters.add(w);
 
 		map.addTile(col, row, w);
 
@@ -267,10 +290,10 @@ public class Level {
 			} else {
 				water(col, row + 1, map, 0);
 			}
-		} else if ((row + 1 < map.getTiles()[0].length && !(map.getTiles()[col][row + 1] instanceof Water)
-				&& (map.getTiles()[col][row + 1].isSolid()))) {
+		} else if (row + 1 < map.getTiles()[0].length && !(map.getTiles()[col][row + 1] instanceof Water)
+				&& (map.getTiles()[col][row + 1].isSolid())) {
 			int firstFullness = fullness;
-
+					System.out.println("go left and right");
 			if (firstFullness != 1) {
 				firstFullness -= 1;
 			}
@@ -282,7 +305,7 @@ public class Level {
 			}
 			// left
 			if (col - 1 >= 0 && !(map.getTiles()[col - 1][row] instanceof Water)
-					&& !(map.getTiles()[col + 1][row].isSolid())) {
+					&& !(map.getTiles()[col - 1][row].isSolid())) {
 				water(col - 1, row, map, firstFullness);
 			}
 		}
