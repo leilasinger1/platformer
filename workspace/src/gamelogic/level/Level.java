@@ -36,6 +36,7 @@ public class Level {
 	private ArrayList<Enemy> enemiesList = new ArrayList<>();
 	private ArrayList<Flower> flowers = new ArrayList<>();
 	private ArrayList<Water> waters  = new ArrayList<>();
+	private ArrayList<Gas> gasses = new ArrayList<>();
 
 	private List<PlayerDieListener> dieListeners = new ArrayList<>();
 	private List<PlayerWinListener> winListeners = new ArrayList<>();
@@ -64,6 +65,7 @@ public class Level {
 		int[][] values = mapdata.getValues();
 		Tile[][] tiles = new Tile[width][height];
 		waters = new ArrayList();
+		gasses = new ArrayList();
 
 		for (int x = 0; x < width; x++) {
 			int xPosition = x;
@@ -191,10 +193,40 @@ public class Level {
 				if (w.getHitbox().isIntersecting(player.getHitbox())){
 					//System.out.println("Touching water");
 					didITouchWater = true;
+					player.walkSpeed = 100;
 				}
 			}
+
+			boolean didItTouchGas = false;
+			for (Gas g: gasses){
+				if (g.getHitbox().isIntersecting(player.getHitbox())){
+					System.out.println("Touching gas");
+					didItTouchGas = true;
+				}
+			}
+
+			if (!didItTouchGas){
+				player.time = 0;
+			}
+			else{
+				if(player.time ==0){
+					player.time = System.currentTimeMillis();
+				}
+				else{
+					 double newTime = (System.currentTimeMillis()-player.time)/1000;
+					 if (newTime >= 13){
+						onPlayerDeath();
+					 }
+				}
+
+			}
+
+
+
+
 			if (!didITouchWater){
 				//System.out.println("never touched water");
+				player.walkSpeed=900;
 			}
 			// Update the enemies
 			for (int i = 0; i < enemies.length; i++) {
@@ -236,6 +268,7 @@ public class Level {
 							map.addTile(colIndex, rowIndex, g);
 							numSquaresToFill--;
 							placedThisRound.add(g);
+							gasses.add(g);
 
 						}
 					}
@@ -262,6 +295,7 @@ public class Level {
 	// blocks, (ie: if there is no block, falling water, full water if there is,
 	// with half next to it, and then a quarter)
 	private void water(int col, int row, Map map, int fullness) {
+		
 		String size = "Full_water";
 		if (fullness == 2) {
 			size = "Half_water";

@@ -14,17 +14,18 @@ import gamelogic.tiles.Tile;
 public class Player extends PhysicsObject{
 	public float walkSpeed = 400;
 	public float jumpPower = 1350;
-	private long time;
+	public long time;
 	
-
+	private boolean keyPressed = false;
 	private boolean isJumping = false;
+	private boolean secondJump = true;
+	
 
 	public Player(float x, float y, Level level) {
-	
 		super(x, y, level.getLevelData().getTileSize(), level.getLevelData().getTileSize(), level);
 		int offset =(int)(level.getLevelData().getTileSize()*0.1); //hitbox is offset by 10% of the player size.
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
-		time = System.currentTimeMillis();
+		time = 0;
 	}
 
 	@Override
@@ -38,25 +39,39 @@ public class Player extends PhysicsObject{
 		if(PlayerInput.isRightKeyDown()) {
 			movementVector.x = +walkSpeed;
 		}
-		if(PlayerInput.isJumpKeyDown() && !isJumping) {
-			movementVector.y = -jumpPower;
-			isJumping = true;
-		}
+
 		
+		if(PlayerInput.isJumpKeyDown()) {
+			if(!isJumping){
+				movementVector.y = -jumpPower;
+				isJumping = true;
+				keyPressed= false;
+			}
+			else if(secondJump==true && keyPressed==true){
+				movementVector.y = -jumpPower;
+				secondJump= false;
+				System.out.println("second jump");
+			}
+		}
+		if(!PlayerInput.isJumpKeyDown()){
+			keyPressed = true;
+		}
+
+
 		isJumping = true;
-		if(collisionMatrix[BOT] != null) isJumping = false;
+		if(collisionMatrix[BOT] != null) {isJumping = false; secondJump = true;}
 	}
 
 	@Override
 	public void draw(Graphics g) {
 
-		g.setColor(Color.YELLOW);
+		g.setColor(Color.BLUE);
 		MyGraphics.fillRectWithOutline(g, (int)getX(), (int)getY(), width, height);
 		g.setFont(new Font("Arial", Font.PLAIN,  50));
-		g.drawString((System.currentTimeMillis()-time)/1000+"",(int)getX(), (int)getY());
-		if (System.currentTimeMillis()-time>5000){
-			time = System.currentTimeMillis();
+		if(time != 0){
+			g.drawString((System.currentTimeMillis()-time)/1000+"",(int)getX(), (int)getY());
 		}
+	
 		
 		if(Main.DEBUGGING) {
 			for (int i = 0; i < closestMatrix.length; i++) {
